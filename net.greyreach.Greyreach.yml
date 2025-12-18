@@ -2,36 +2,46 @@ id: net.greyreach.Greyreach
 runtime: org.freedesktop.Platform
 runtime-version: '23.08'
 sdk: org.freedesktop.Sdk
-command: Greyreach.py
+command: Greyreach.sh # Changed to a .sh wrapper for better reliability
 finish-args:
   - --socket=x11
   - --share=ipc
   - --device=dri
   - --socket=pulseaudio
-  - --env=PYTHONPATH=/app/lib/python3.11/site-packages
+  - --share=network # Added for standard building
 modules:
   - name: python3-pygame
     buildsystem: simple
     build-commands:
-      - tar xf pygame-2.5.2.tar.gz
-      - cd pygame-2.5.2 && python3 setup.py install --prefix=/app --root=/ --single-version-externally-managed
-    sources:
-      - type: file
-        url: https://pypi.io/packages/source/p/pygame/pygame-2.5.2.tar.gz
-        sha256: c1b89eb5d539e7ac5cf75513125fb5f2f0a2d918b1fd6e981f23bf0ac1b1c24a
+      - pip3 install --prefix=/app pygame==2.5.2
+  
   - name: greyreach-game
     buildsystem: simple
     build-commands:
+      # Create folders
       - mkdir -p /app/bin
       - mkdir -p /app/share/greyreach
-      # NEW: This version 'CDs' into the game folder so it finds 'shoot.wav.mp3'
-      - echo '#!/bin/sh' > /app/bin/Greyreach.py
-      - echo 'export PYTHONPATH=/app/lib/python3.11/site-packages:$PYTHONPATH' >> /app/bin/Greyreach.py
-      - echo 'cd /app/share/greyreach' >> /app/bin/Greyreach.py
-      - echo 'exec python3 Greyreach.py "$@"' >> /app/bin/Greyreach.py
-      - chmod +x /app/bin/Greyreach.py
-      - install -Dm644 Greyreach.py /app/share/greyreach/Greyreach.py
+      - mkdir -p /app/share/applications
+      - mkdir -p /app/share/metainfo
+      - mkdir -p /app/share/icons/hicolor/256x256/apps
+
+      # Install the Game files
+      - cp Greyreach.py /app/share/greyreach/
       - cp *.mp3 /app/share/greyreach/ || true
+      - cp *.wav.mp3 /app/share/greyreach/ || true
+
+      # Create the startup script (The Wrapper)
+      - echo '#!/bin/sh' > /app/bin/Greyreach.sh
+      - echo 'cd /app/share/greyreach' >> /app/bin/Greyreach.sh
+      - echo 'exec python3 Greyreach.py "$@"' >> /app/bin/Greyreach.sh
+      - chmod +x /app/bin/Greyreach.sh
+
+      # Install Linux Desktop Integration files
+      - install -Dm644 net.greyreach.Greyreach.desktop /app/share/applications/net.greyreach.Greyreach.desktop
+      - install -Dm644 net.greyreach.Greyreach.metainfo.xml /app/share/metainfo/net.greyreach.Greyreach.metainfo.xml
+      - install -Dm644 icon.png /app/share/icons/hicolor/256x256/apps/net.greyreach.Greyreach.png
+
     sources:
-      - type: dir
-        path: Greyreach-0.1
+      - type: git
+        url: https://github.com/voidscan/greyreach-game.git
+        branch: main

@@ -1,0 +1,8 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Greyreach
+Exec=Greyreach.py
+Icon=net.greyreach.Greyreach
+Categories=Game;
+Terminal=false

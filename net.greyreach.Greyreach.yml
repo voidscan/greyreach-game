@@ -1,0 +1,37 @@
+id: net.greyreach.Greyreach
+runtime: org.freedesktop.Platform
+runtime-version: '23.08'
+sdk: org.freedesktop.Sdk
+command: Greyreach.py
+finish-args:
+  - --socket=x11
+  - --share=ipc
+  - --device=dri
+  - --socket=pulseaudio
+  - --env=PYTHONPATH=/app/lib/python3.11/site-packages
+modules:
+  - name: python3-pygame
+    buildsystem: simple
+    build-commands:
+      - tar xf pygame-2.5.2.tar.gz
+      - cd pygame-2.5.2 && python3 setup.py install --prefix=/app --root=/ --single-version-externally-managed
+    sources:
+      - type: file
+        url: https://pypi.io/packages/source/p/pygame/pygame-2.5.2.tar.gz
+        sha256: c1b89eb5d539e7ac5cf75513125fb5f2f0a2d918b1fd6e981f23bf0ac1b1c24a
+  - name: greyreach-game
+    buildsystem: simple
+    build-commands:
+      - mkdir -p /app/bin
+      - mkdir -p /app/share/greyreach
+      # NEW: This version 'CDs' into the game folder so it finds 'shoot.wav.mp3'
+      - echo '#!/bin/sh' > /app/bin/Greyreach.py
+      - echo 'export PYTHONPATH=/app/lib/python3.11/site-packages:$PYTHONPATH' >> /app/bin/Greyreach.py
+      - echo 'cd /app/share/greyreach' >> /app/bin/Greyreach.py
+      - echo 'exec python3 Greyreach.py "$@"' >> /app/bin/Greyreach.py
+      - chmod +x /app/bin/Greyreach.py
+      - install -Dm644 Greyreach.py /app/share/greyreach/Greyreach.py
+      - cp *.mp3 /app/share/greyreach/ || true
+    sources:
+      - type: dir
+        path: Greyreach-0.1

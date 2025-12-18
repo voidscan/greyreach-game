@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Greyreach
+Comment=A top-down cellular survival game
+Exec=python3 /usr/bin/Greyreach.py
+Icon=greyreach-game
+Categories=Game;Arcade;
+Terminal=false

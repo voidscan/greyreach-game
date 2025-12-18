@@ -1,0 +1,9 @@
+# Game Script
+Greyreach.py usr/bin/
+
+# Icon
+icon.png usr/share/icons/hicolor/512x512/apps/greyreach-game.png
+
+# Sound Assets
+*.mp3 usr/share/games/greyreach/sounds/
+*.wav.mp3 usr/share/games/greyreach/sounds/
